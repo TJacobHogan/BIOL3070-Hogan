@@ -1,0 +1,325 @@
+Warm-up mini-Report: Mosquito Blood Hosts in Salt Lake City, Utah
+================
+Jacob Hogan
+9-25-25
+
+- [ABSTRACT](#abstract)
+- [BACKGROUND](#background)
+- [STUDY QUESTION and HYPOTHESIS](#study-question-and-hypothesis)
+  - [Questions](#questions)
+  - [Hypothesis](#hypothesis)
+  - [Prediction](#prediction)
+- [MOTHODS](#mothods)
+  - [Fill in first analysis](#fill-in-first-analysis)
+  - [Fill in second analysis/plot](#fill-in-second-analysisplot)
+- [DISCUSSION](#discussion)
+- [Horizontal barplots
+  Interpretation:](#horizontal-barplots-interpretation)
+- [Statistical model Interpretation:](#statistical-model-interpretation)
+- [CONCLUSION](#conclusion)
+- [REFERENCES](#references)
+
+# ABSTRACT
+
+Bloodmeal data from Utah demonstrates several species that host West
+Nile Virus. Host positivity and tests were cross checked and plotted.
+This was used to create other plots that are able to predict positive
+hosts of WNV. House Finches were were the clear leader in WNV positive
+hosts. This data is essential in control of the spread of WNV by
+mosquito controling practices in areas of high populations of House
+Finches.
+
+# BACKGROUND
+
+West Nile Virus (also known as WNV) is a worldwide virus that has
+recently traveled to the United States. WNV as recently as August 2003
+(Utah Epidemiology 2025), and since then there have been 264 total
+deaths in the United States since 2003 (CDC 2025). This virus is passed
+through mosquitos that mediate the virus through infected birds (the
+natural host of WNV) along with other mammals (IBIS-PH 2025). Symptoms
+may include fever, headache, body aches, rash, swollen lymph glands
+(Hopkins Medicine 2025). There has been 1 WNV death in Utah – which
+occurred in 2023 (Fox13 News 2025).
+
+Viremia is the presence of virus in blood, in this r markdown project
+House Finches and the viremia levels of WNV is highlighted. This was
+done to determine their effectiveness as amplifying hosts of WNV through
+high levels of viremia in mosquito pools (Kumar et al., 2003).
+
+``` r
+# Manually transcribe duration (mean, lo, hi) from the last table column
+duration <- data.frame(
+  Bird = c("Canada Goose","Mallard", 
+           "American Kestrel","Northern Bobwhite",
+           "Japanese Quail","Ring-necked Pheasant",
+           "American Coot","Killdeer",
+           "Ring-billed Gull","Mourning Dove",
+           "Rock Dove","Monk Parakeet",
+           "Budgerigar","Great Horned Owl",
+           "Northern Flicker","Blue Jay",
+           "Black-billed Magpie","American Crow",
+           "Fish Crow","American Robin",
+           "European Starling","Red-winged Blackbird",
+           "Common Grackle","House Finch","House Sparrow"),
+  mean = c(4.0,4.0,4.5,4.0,1.3,3.7,4.0,4.5,5.5,3.7,3.2,2.7,1.7,6.0,4.0,
+           4.0,5.0,3.8,5.0,4.5,3.2,3.0,3.3,6.0,4.5),
+  lo   = c(3,4,4,3,0,3,4,4,4,3,3,1,0,6,3,
+           3,5,3,4,4,3,3,3,5,2),
+  hi   = c(5,4,5,5,4,4,4,5,7,4,4,4,4,6,5,
+           5,5,5,7,5,4,3,4,7,6)
+)
+
+# Choose some colors
+cols <- c(rainbow(30)[c(10:29,1:5)])  # rainbow colors
+
+# horizontal barplot
+par(mar=c(5,12,2,2))  # wider left margin for names
+bp <- barplot(duration$mean, horiz=TRUE, names.arg=duration$Bird,
+              las=1, col=cols, xlab="Days of detectable viremia", xlim=c(0,7))
+
+# add error bars
+arrows(duration$lo, bp, duration$hi, bp,
+       angle=90, code=3, length=0.05, col="black", xpd=TRUE)
+```
+
+<img src="Warm-up-mosquitoes-JACOB-HOGAN_files/figure-gfm/viremia-1.png" style="display: block; margin: auto auto auto 0;" />
+
+# STUDY QUESTION and HYPOTHESIS
+
+## Questions
+
+Which species in Utah are hosting West Nile Virus in Utah?
+
+## Hypothesis
+
+House Finches are currrently the main host for West Nile Virus in the
+Utah area.
+
+## Prediction
+
+If house finches are the main host of West Nile Virus, the most
+effective way of controlling the spread of WNV is through targeted
+attacks of mosquitos in areas that house finches reside.
+
+# MOTHODS
+
+Mosquitos were collected using traps, with them then undergoing DNA
+amplification through DNA digestion and PCR. This data was processed
+into the document blood_plusWNV_for_BIOL3070.csv. Mosquito data was
+taken from blood_plusWNV_for_BIOL3070.csv and imported into the R
+Markdown. The table was organized according to West Nile Virus positive
+or negative. This was then crossed with a different plot to determine
+whether west nile positivitiy in House Finches could be predicted.
+
+## Fill in first analysis
+
+``` r
+## import counts_matrix: data.frame with column 'loc_positives' (0/1) and host columns 'host_*'
+counts_matrix <- read.csv("./bloodmeal_plusWNV_for_BIOL3070.csv")
+
+## 1) Identify host columns
+host_cols <- grep("^host_", names(counts_matrix), value = TRUE)
+
+if (length(host_cols) == 0) {
+  stop("No columns matching '^host_' were found in counts_matrix.")
+}
+
+## 2) Ensure loc_positives is present and has both levels 0 and 1 where possible
+counts_matrix$loc_positives <- factor(counts_matrix$loc_positives, levels = c(0, 1))
+
+## 3) Aggregate host counts by loc_positives
+agg <- stats::aggregate(
+  counts_matrix[, host_cols, drop = FALSE],
+  by = list(loc_positives = counts_matrix$loc_positives),
+  FUN = function(x) sum(as.numeric(x), na.rm = TRUE)
+)
+
+## make sure both rows exist; if one is missing, add a zero row
+need_levels <- setdiff(levels(counts_matrix$loc_positives), as.character(agg$loc_positives))
+if (length(need_levels)) {
+  zero_row <- as.list(rep(0, length(host_cols)))
+  names(zero_row) <- host_cols
+  for (lv in need_levels) {
+    agg <- rbind(agg, c(lv, zero_row))
+  }
+  ## restore proper type
+  agg$loc_positives <- factor(agg$loc_positives, levels = c("0","1"))
+  ## coerce numeric host cols (they may have become character after rbind)
+  for (hc in host_cols) agg[[hc]] <- as.numeric(agg[[hc]])
+  agg <- agg[order(agg$loc_positives), , drop = FALSE]
+}
+
+## 4) Decide species order (overall abundance, descending)
+overall <- colSums(agg[, host_cols, drop = FALSE], na.rm = TRUE)
+host_order <- names(sort(overall, decreasing = TRUE))
+species_labels <- rev(sub("^host_", "", host_order))  # nicer labels
+
+## 5) Build count vectors for each panel in the SAME order
+counts0 <- rev(as.numeric(agg[agg$loc_positives == 0, host_order, drop = TRUE]))
+counts1 <- rev(as.numeric(agg[agg$loc_positives == 1, host_order, drop = TRUE]))
+
+## 6) Colors: reuse your existing 'cols' if it exists and is long enough; otherwise generate
+if (exists("cols") && length(cols) >= length(host_order)) {
+  species_colors <- setNames(cols[seq_along(host_order)], species_labels)
+} else {
+  species_colors <- setNames(rainbow(length(host_order) + 10)[seq_along(host_order)], species_labels)
+}
+
+## 7) Shared x-limit for comparability
+xmax <- max(c(counts0, counts1), na.rm = TRUE)
+xmax <- if (is.finite(xmax)) xmax else 1
+xlim_use <- c(0, xmax * 1.08)
+
+## 8) Plot: two horizontal barplots with identical order and colors
+op <- par(mfrow = c(1, 2),
+          mar = c(4, 12, 3, 2),  # big left margin for species names
+          xaxs = "i")           # a bit tighter axis padding
+
+## Panel A: No WNV detected (loc_positives = 0)
+barplot(height = counts0,
+        names.arg = species_labels, 
+        cex.names = .5,
+        cex.axis = .5,
+        col = rev(unname(species_colors[species_labels])),
+        horiz = TRUE,
+        las = 1,
+        xlab = "Bloodmeal counts",
+        main = "Locations WNV (-)",
+        xlim = xlim_use)
+
+## Panel B: WNV detected (loc_positives = 1)
+barplot(height = counts1,
+        names.arg = species_labels, 
+        cex.names = .5,
+        cex.axis = .5,
+        col = rev(unname(species_colors[species_labels])),
+        horiz = TRUE,
+        las = 1,
+        xlab = "Bloodmeal counts",
+        main = "Locations WNV (+)",
+        xlim = xlim_use)
+```
+
+![](Warm-up-mosquitoes-JACOB-HOGAN_files/figure-gfm/first-analysis-1.png)<!-- -->
+
+``` r
+par(op)
+
+## Keep the colors mapping for reuse elsewhere
+host_species_colors <- species_colors
+```
+
+## Fill in second analysis/plot
+
+``` r
+# second-analysis-or-plot, glm with house finch alone against binary +/_
+glm1 <- glm(loc_positives ~ host_House_finch,
+            data = counts_matrix,
+            family = binomial)
+summary(glm1)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = loc_positives ~ host_House_finch, family = binomial, 
+    ##     data = counts_matrix)
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error z value Pr(>|z|)  
+    ## (Intercept)       -0.1709     0.1053  -1.622   0.1047  
+    ## host_House_finch   0.3468     0.1586   2.187   0.0287 *
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for binomial family taken to be 1)
+    ## 
+    ##     Null deviance: 546.67  on 394  degrees of freedom
+    ## Residual deviance: 539.69  on 393  degrees of freedom
+    ## AIC: 543.69
+    ## 
+    ## Number of Fisher Scoring iterations: 4
+
+``` r
+#glm with house-finch alone against positivity rate
+glm2 <- glm(loc_rate ~ host_House_finch,
+            data = counts_matrix)
+summary(glm2)
+```
+
+    ## 
+    ## Call:
+    ## glm(formula = loc_rate ~ host_House_finch, data = counts_matrix)
+    ## 
+    ## Coefficients:
+    ##                  Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)      0.054861   0.006755   8.122 6.07e-15 ***
+    ## host_House_finch 0.027479   0.006662   4.125 4.54e-05 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## (Dispersion parameter for gaussian family taken to be 0.01689032)
+    ## 
+    ##     Null deviance: 6.8915  on 392  degrees of freedom
+    ## Residual deviance: 6.6041  on 391  degrees of freedom
+    ##   (2 observations deleted due to missingness)
+    ## AIC: -484.56
+    ## 
+    ## Number of Fisher Scoring iterations: 2
+
+# DISCUSSION
+
+# Horizontal barplots Interpretation:
+
+This plot shows how common Utah birds are the most likely to be WNV
+hosts. WNV positive and negative samples had differing compositions in
+species. House Finches are the most common WNV host.
+
+The plot demonstrates that mosquito blood meals of these birds shows a
+significant increase in WNV contraction.
+
+# Statistical model Interpretation:
+
+The House Finch blood-meal coefficient had a positively statistically
+significant (p \< 0.05).
+
+This shows that as blood meals in a specific area increase, the
+likelyhood of a positive host test increases aswell.
+
+In short, House Finches are a great indicator of WNV amplification.
+
+# CONCLUSION
+
+In conclusion, the original hypothesis of a common Utah bird being the
+primary host of WNV and using that bird species to predict the growth of
+WNV. This hypothesis was proven correct as the barplot and linear model
+show a correlation between WNV positivity and the host species. To put
+this finding into our hypothesis, it means that they higher level of
+host species in an area would prove a greater increase of WNV. This
+finding is essential to control the spread of WNV as mosquito abatement
+in those areas of high host species (House Finches).
+
+# REFERENCES
+
+1.  Komar N, Langevin S, Hinten S, Nemeth N, Edwards E, Hettler D, Davis
+    B, Bowen R, Bunning M. Experimental infection of North American
+    birds with the New York 1999 strain of West Nile virus. Emerg Infect
+    Dis. 2003 Mar;9(3):311-22. <https://doi.org/10.3201/eid0903.020628>
+
+2.  ChatGPT. OpenAI, version Jan 2025. Used as a reference for functions
+    such as plot() and to correct syntax errors. Accessed 2025-10-09.
+
+3.  West Nile virus. Utah Epidemiology. (n.d.).
+    <https://epi.utah.gov/west-nile-virus/>
+
+4.  Centers for Disease Control and Prevention. (n.d.). Historic Data
+    (1999-2024). Centers for Disease Control and Prevention.
+    <https://www.cdc.gov/west-nile-virus/data-maps/historic-data.html>
+
+5.  Health, D. of. (n.d.). Complete health indicator report of west nile
+    virus infections. IBIS.
+    <https://ibis.utah.gov/ibisph-view/indicator/complete_profile/WNVInf.html>
+
+6.  Michael Martin, S. M. (2025, September 3). Utah officials confirm 8
+    West Nile virus cases, including Fatal case. FOX 13 News Utah
+    (KSTU).
+    <https://www.fox13now.com/news/local-news/northern-utah/utah-county-officials-confirm-5-west-nile-virus-cases-4-with-neuroinvasive-symptoms>
