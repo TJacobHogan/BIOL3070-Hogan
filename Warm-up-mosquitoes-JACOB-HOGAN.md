@@ -9,9 +9,9 @@ Jacob Hogan
   - [Questions](#questions)
   - [Hypothesis](#hypothesis)
   - [Prediction](#prediction)
-- [MOTHODS](#mothods)
-  - [Fill in first analysis](#fill-in-first-analysis)
-  - [Fill in second analysis/plot](#fill-in-second-analysisplot)
+- [METHODS](#methods)
+  - [First analysis](#first-analysis)
+  - [Second analysis](#second-analysis)
 - [DISCUSSION](#discussion)
 - [Horizontal barplots
   Interpretation:](#horizontal-barplots-interpretation)
@@ -22,12 +22,14 @@ Jacob Hogan
 # ABSTRACT
 
 Bloodmeal data from Utah demonstrates several species that host West
-Nile Virus. Host positivity and tests were cross checked and plotted.
-This was used to create other plots that are able to predict positive
-hosts of WNV. House Finches were were the clear leader in WNV positive
-hosts. This data is essential in control of the spread of WNV by
-mosquito controling practices in areas of high populations of House
-Finches.
+Nile Virus. Host positivity and tests were cross checked and plotted. In
+this markdown, the hypothesis is that by using the common carrier (House
+Finces) the areas of increased WNV may be predicted by area of total
+carrier population. This was used to create other plots that are able to
+predict positive hosts of WNV. House Finches were were the clear leader
+in WNV positive hosts. This data is essential in control of the spread
+of WNV by mosquito controling practices in areas of high populations of
+House Finches.
 
 # BACKGROUND
 
@@ -101,7 +103,7 @@ If house finches are the main host of West Nile Virus, the most
 effective way of controlling the spread of WNV is through targeted
 attacks of mosquitos in areas that house finches reside.
 
-# MOTHODS
+# METHODS
 
 Mosquitos were collected using traps, with them then undergoing DNA
 amplification through DNA digestion and PCR. This data was processed
@@ -111,7 +113,7 @@ Markdown. The table was organized according to West Nile Virus positive
 or negative. This was then crossed with a different plot to determine
 whether west nile positivitiy in House Finches could be predicted.
 
-## Fill in first analysis
+## First analysis
 
 ``` r
 ## import counts_matrix: data.frame with column 'loc_positives' (0/1) and host columns 'host_*'
@@ -209,7 +211,7 @@ par(op)
 host_species_colors <- species_colors
 ```
 
-## Fill in second analysis/plot
+## Second analysis
 
 ``` r
 # second-analysis-or-plot, glm with house finch alone against binary +/_
