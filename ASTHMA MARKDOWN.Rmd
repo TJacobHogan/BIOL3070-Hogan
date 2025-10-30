@@ -1,0 +1,60 @@
+---
+title: "GROUP ASTHMA"
+output: html_document
+date: "2025-10-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+```{r scatterplot, message=FALSE, warning=FALSE}
+
+# Load libraries
+library(tidyverse)
+library(viridis)
+
+# Read in the data
+copd <- read_csv("copd_2021.csv")
+
+# Remove the national total
+copd <- copd %>% filter(State != "United States")
+
+# Create scatterplot: Female vs. Male COPD prevalence
+ggplot(copd, aes(x = Male_Percent, y = Female_Percent, 
+                 size = Total_Percent, color = Total_Percent, label = State)) +
+  geom_point(alpha = 0.8) +
+  geom_text(aes(label = State), hjust = 1.2, vjust = 0.5, size = 3, check_overlap = TRUE) +
+  scale_color_viridis(name = "Total COPD (%)", option = "C", direction = -1) +
+  scale_size_continuous(name = "Total COPD (%)") +
+  labs(
+    title = "COPD Prevalence by State: Male vs. Female (2021)",
+    x = "Male COPD Prevalence (%)",
+    y = "Female COPD Prevalence (%)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    legend.position = "right"
+  )
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
