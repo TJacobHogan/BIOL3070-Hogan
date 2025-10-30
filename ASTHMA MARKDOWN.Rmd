@@ -16,7 +16,7 @@ When you click the **Knit** button a document will be generated that includes bo
 
 
 
-```{r scatterplot, message=FALSE, warning=FALSE}
+```{r scatterplot, message=FALSE, warning=FALSE, eval=FALSE}
 
 # Load libraries
 library(tidyverse)
