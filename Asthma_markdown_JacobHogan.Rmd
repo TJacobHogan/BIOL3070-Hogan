@@ -1,7 +1,7 @@
 ---
 title: "Prevalence of COPD in Areas of Low Air Quality"
 author: "Jacob Hogan"
-output: html_document
+output: github_document
 date: "2025-10-30"
 ---
 
